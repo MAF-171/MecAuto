@@ -1,0 +1,85 @@
+/* =====================================================================
+   MecAuto - Consultas útiles para verificar la información desde SSMS
+   Archivo: database/consultas.sql
+   Son consultas de SOLO LECTURA: puede ejecutarlas con tranquilidad.
+   Seleccione una consulta y presione F5 para ejecutar solo esa.
+   ===================================================================== */
+USE MecAutoDB;
+GO
+
+-- 1) ¿Se están guardando datos? Cantidad de filas por tabla
+SELECT 'cliente' AS tabla, COUNT(*) AS filas FROM dbo.cliente
+UNION ALL SELECT 'vehiculo', COUNT(*) FROM dbo.vehiculo
+UNION ALL SELECT 'cita', COUNT(*) FROM dbo.cita
+UNION ALL SELECT 'orden_trabajo', COUNT(*) FROM dbo.orden_trabajo
+UNION ALL SELECT 'repuesto', COUNT(*) FROM dbo.repuesto
+UNION ALL SELECT 'movimiento_inventario', COUNT(*) FROM dbo.movimiento_inventario
+UNION ALL SELECT 'cotizacion', COUNT(*) FROM dbo.cotizacion
+UNION ALL SELECT 'comprobante', COUNT(*) FROM dbo.comprobante
+UNION ALL SELECT 'usuario', COUNT(*) FROM dbo.usuario;
+
+-- 2) Usuarios y roles (la contraseña NUNCA se muestra: solo existe su hash)
+SELECT id_usuario, nombre_usuario, nombre_completo, rol, activo, ultimo_acceso FROM dbo.usuario;
+
+-- 3) Lista de órdenes (equivale a la pantalla "Órdenes de Trabajo")
+SELECT o.codigo, c.nombres_razon_social AS cliente, v.placa, o.descripcion_falla,
+       u.nombre_completo AS mecanico, o.estado, o.fecha_entrega_est, o.total
+FROM dbo.orden_trabajo o
+JOIN dbo.cliente  c ON c.id_cliente  = o.id_cliente
+JOIN dbo.vehiculo v ON v.id_vehiculo = o.id_vehiculo
+LEFT JOIN dbo.usuario u ON u.id_usuario = o.id_mecanico
+ORDER BY o.fecha_ingreso DESC;
+
+-- 4) Órdenes por estado
+SELECT estado, COUNT(*) AS cantidad FROM dbo.orden_trabajo GROUP BY estado ORDER BY cantidad DESC;
+
+-- 5) Repuestos con stock bajo (stock_actual <= stock_minimo)
+SELECT codigo, nombre, stock_actual, stock_minimo
+FROM dbo.repuesto WHERE activo = 1 AND stock_actual <= stock_minimo ORDER BY nombre;
+
+-- 6) Movimientos de inventario más recientes
+SELECT TOP 50 m.fecha, r.codigo, r.nombre, m.tipo, m.cantidad, m.stock_anterior, m.stock_posterior,
+       o.codigo AS orden, u.nombre_usuario AS usuario, m.motivo
+FROM dbo.movimiento_inventario m
+JOIN dbo.repuesto r ON r.id_repuesto = m.id_repuesto
+LEFT JOIN dbo.orden_trabajo o ON o.id_orden = m.id_orden
+LEFT JOIN dbo.usuario u ON u.id_usuario = m.id_usuario
+ORDER BY m.fecha DESC;
+
+-- 7) Comprobación de integridad: el stock debe coincidir con la suma de los movimientos
+SELECT r.codigo, r.stock_actual,
+       SUM(CASE WHEN m.tipo IN ('ENTRADA','AJUSTE_ENTRADA','DEVOLUCION') THEN m.cantidad ELSE -m.cantidad END) AS stock_segun_movimientos
+FROM dbo.repuesto r
+LEFT JOIN dbo.movimiento_inventario m ON m.id_repuesto = r.id_repuesto
+GROUP BY r.codigo, r.stock_actual
+HAVING r.stock_actual <> ISNULL(SUM(CASE WHEN m.tipo IN ('ENTRADA','AJUSTE_ENTRADA','DEVOLUCION') THEN m.cantidad ELSE -m.cantidad END), 0);
+-- (si no devuelve filas, todo está consistente)
+
+-- 8) Historial de mantenimiento de un vehículo (cambie la placa)
+SELECT v.placa, o.codigo, o.fecha_completada, o.kilometraje_ingreso, o.diagnostico, o.trabajos_realizados, o.total
+FROM dbo.orden_trabajo o
+JOIN dbo.vehiculo v ON v.id_vehiculo = o.id_vehiculo
+WHERE v.placa = 'ABC-123' AND o.estado IN ('COMPLETADA', 'ENTREGADA')
+ORDER BY o.fecha_completada DESC;
+
+-- 9) Ingresos por mes (comprobantes EMITIDOS)
+SELECT FORMAT(fecha_emision, 'yyyy-MM') AS mes, COUNT(*) AS comprobantes, SUM(total) AS total_soles
+FROM dbo.comprobante WHERE estado = 'EMITIDO'
+GROUP BY FORMAT(fecha_emision, 'yyyy-MM') ORDER BY mes DESC;
+
+-- 10) Comprobantes emitidos
+SELECT tipo, serie + '-' + RIGHT('00000000' + CAST(numero AS VARCHAR(8)), 8) AS numero_completo,
+       cliente_nombre, placa, subtotal, igv, total, estado, fecha_emision
+FROM dbo.comprobante ORDER BY fecha_emision DESC;
+
+-- 11) Citas próximas
+SELECT codigo, fecha_hora, nombre_contacto, telefono_contacto, placa, estado, origen
+FROM dbo.cita WHERE fecha_hora >= CAST(SYSDATETIME() AS DATE) ORDER BY fecha_hora;
+
+-- 12) Historial de cambios de estado de las órdenes
+SELECT o.codigo, h.estado_anterior, h.estado_nuevo, u.nombre_usuario, h.comentario, h.fecha
+FROM dbo.orden_historial_estado h
+JOIN dbo.orden_trabajo o ON o.id_orden = h.id_orden
+LEFT JOIN dbo.usuario u ON u.id_usuario = h.id_usuario
+ORDER BY h.fecha DESC;
+GO

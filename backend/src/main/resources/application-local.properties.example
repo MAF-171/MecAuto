@@ -1,0 +1,18 @@
+# Copia este archivo como application-local.properties (está en .gitignore)
+# y ejecuta con:  mvn spring-boot:run "-Dspring-boot.run.profiles=local"
+#
+# Alternativa recomendada: usar variables de entorno (ver README).
+
+spring.datasource.username=mecauto_app
+spring.datasource.password=CAMBIA_ESTA_CLAVE
+
+# SOLO PARA DESARROLLO LOCAL con un SQL Server que usa certificado autofirmado
+# (instalación típica de SQL Server Express/Developer en Windows).
+# En un servidor real NO uses trustServerCertificate=true: instala un certificado válido.
+spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=MECAUTO;encrypt=true;trustServerCertificate=true;sendStringParametersAsUnicode=false
+
+mecauto.jwt.secret=GENERA_UNA_CADENA_ALEATORIA_DE_AL_MENOS_32_CARACTERES
+
+# Cuenta administradora inicial (se crea una sola vez si la tabla usuario está vacía)
+mecauto.admin-inicial.username=admin
+mecauto.admin-inicial.password=ELIGE_UNA_CLAVE_FUERTE_DE_12_O_MAS

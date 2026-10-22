@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "MecAuto backend (Spring Boot)",
+      "request": "launch",
+      "mainClass": "pe.mecauto.MecAutoApplication",
+      "projectName": "mecauto",
+      "cwd": "${workspaceFolder}/backend",
+      // Variables de entorno locales (NO se versiona). Copia backend/env.example como backend/.env.local
+      "envFile": "${workspaceFolder}/backend/.env.local"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+# Java / Maven
+backend/target/
+*.class
+*.log
+# Node
+frontend/node_modules/
+frontend/dist/
+# Entorno y secretos (NUNCA versionar)
+.env
+*.local
+backend/src/main/resources/application-local.properties
+# IDE
+.idea/
+*.iml
+.DS_Store
+backend/logs/
