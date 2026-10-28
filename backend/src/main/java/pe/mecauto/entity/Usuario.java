@@ -30,6 +30,14 @@ public class Usuario {
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
+    /** Correo y celular sirven para recuperar la contraseña; ambos son opcionales y únicos. */
+    @Column(name = "correo", length = 100, unique = true)
+    private String correo;
+
+    /** Celular en formato internacional (+51987654321). */
+    @Column(name = "telefono", length = 20, unique = true)
+    private String telefono;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "rol", nullable = false, length = 20)
     private Rol rol;

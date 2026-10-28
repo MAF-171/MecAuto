@@ -139,6 +139,11 @@ input[type=checkbox]{width:auto}
 .login-pagina{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,var(--negro),#2a0b0d);padding:1rem}
 .login-caja{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:400px;box-shadow:0 20px 50px rgba(0,0,0,.4)}
 .login-caja .marca{margin-bottom:1.2rem}
+.login-olvido{text-align:right;margin:-.35rem 0 .9rem;font-size:.85rem} .login-olvido a{color:var(--gris-700);font-weight:500} .login-olvido a:hover{color:var(--rojo)}
+.login-volver{display:flex;align-items:center;justify-content:center;gap:.35rem;width:100%;margin-top:.75rem;padding:.6rem 1rem;border:1.5px solid var(--gris-300);border-radius:8px;color:var(--gris-700);font-weight:600;font-size:.92rem;text-decoration:none;transition:border-color .15s,color .15s,background .15s}
+.login-volver:hover{border-color:var(--rojo);color:var(--rojo);background:#fff5f5}
+.login-pasos{display:flex;gap:.4rem;margin:0 0 1rem} .login-pasos span{flex:1;height:4px;border-radius:4px;background:var(--gris-200)} .login-pasos span.activo{background:var(--rojo)}
+.login-ok{background:#e8f6ee;color:#1d6b3e;border:1px solid #b9e2c9;padding:.7rem .9rem;border-radius:8px;margin:.5rem 0 1rem;font-size:.9rem}
 
 /* ----- Sitio público ----- */
 .pub-nav{position:sticky;top:0;z-index:30;background:rgba(8,8,8,.96);color:#fff;backdrop-filter:blur(6px)}

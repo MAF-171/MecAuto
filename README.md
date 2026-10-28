@@ -70,6 +70,9 @@ Los secretos **no** van en archivos versionados. Copia `backend/env.example` com
 | `MECAUTO_ADMIN_USER` / `MECAUTO_ADMIN_PASSWORD` | solo la 1.ª vez | Crean el primer administrador **solo si la tabla `usuario` está vacía**. Contraseña: mínimo 10 caracteres con letras y números. Luego puedes quitarlas. |
 | `MECAUTO_CORS_ORIGENES` | no | Origen del frontend permitido (por defecto `http://localhost:5173`). |
 | `MECAUTO_DDL_AUTO` | no | `none` por defecto. Pon `validate` si quieres que Hibernate compare entidades y tablas al arrancar. Nunca se usa `update`/`create`. |
+| `MECAUTO_MAIL_HOST` / `MECAUTO_MAIL_PORT` / `MECAUTO_MAIL_USER` / `MECAUTO_MAIL_PASSWORD` | para recuperar contraseña por correo | Servidor SMTP que envía el código de recuperación. Con Gmail: `smtp.gmail.com`, puerto `587`, tu correo y una **contraseña de aplicación** (no la clave normal). `MECAUTO_MAIL_REMITENTE` cambia el remitente (por defecto, el usuario SMTP). |
+| `MECAUTO_TWILIO_SID` / `MECAUTO_TWILIO_TOKEN` / `MECAUTO_TWILIO_NUMERO` | para recuperar contraseña por SMS | Cuenta de [Twilio](https://www.twilio.com) (servicio de pago) para enviar el código por SMS al celular. Sin ellas, la recuperación por celular no envía nada. |
+| `MECAUTO_CODIGO_EN_LOG` | no | `true` escribe el código de recuperación en el log cuando no hay correo/SMS configurado. **Solo para probar en tu PC**, nunca en un servidor real. |
 
 **Certificado de SQL Server:** por defecto se exige certificado válido (`encrypt=true;trustServerCertificate=false`). SQL Server de escritorio usa un certificado autofirmado, por lo que **solo en tu PC de desarrollo** puedes poner `trustServerCertificate=true` en `MECAUTO_DB_URL`. No lo uses en un servidor real.
 
@@ -108,7 +111,7 @@ Abre <http://localhost:5173>. Vite reenvía `/api` al backend (`http://localhost
 1. Arranca el backend con `MECAUTO_ADMIN_USER` y `MECAUTO_ADMIN_PASSWORD`; el log dirá «Administrador inicial … creado».
 2. Entra a <http://localhost:5173/#/login> con ese usuario.
 3. En **Configuración** completa nombre, RUC, dirección, teléfono y horario del taller. Mientras estén vacíos, el sitio público no muestra datos de contacto (no se inventan).
-4. En **Usuarios** crea al personal de recepción y a los mecánicos.
+4. En **Usuarios** crea al personal de recepción y a los mecánicos. Registra su **correo y/o celular**: con ellos cada persona puede recuperar su contraseña desde «¿Olvidaste tu contraseña?» en la pantalla de acceso (recibe un código de 6 dígitos que vence en 15 minutos).
 5. En **Servicios** revisa el catálogo; en **Inventario** registra repuestos (el stock inicial queda como movimiento).
 6. Verifica en SSMS con `database/consultas.sql` que lo que hiciste quedó guardado.
 

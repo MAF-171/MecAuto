@@ -50,6 +50,6 @@ public class AuthService {
     }
 
     public UsuarioDto aDto(UsuarioPrincipal p) {
-        return new UsuarioDto(p.getId(), p.getUsername(), p.getNombre(), p.getRol(), p.isEnabled(), null);
+        return new UsuarioDto(p.getId(), p.getUsername(), p.getNombre(), p.getRol(), p.isEnabled(), null, null, null);
     }
 }

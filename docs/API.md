@@ -21,6 +21,8 @@ Roles: **A** = Administrador, **R** = Recepción, **M** = Mecánico. Los listado
 | `POST /public/citas` | Solicita una cita (límite por IP, campo trampa) |
 | `POST /public/ordenes/consulta` | Estado de una orden. Body `{codigo, placa}` (últimos 3 caracteres de la placa como segundo dato). Devuelve solo estado, servicio, placa enmascarada y fechas; mismo error 404 si algo no coincide; límite 15 consultas / 10 min por IP (429) |
 | `POST /auth/login` | Devuelve token y usuario (bloqueo tras 5 fallos en 15 min) |
+| `POST /auth/recuperar/solicitar` | Body `{identificador}` (correo o celular del usuario). Envía un código de 6 dígitos por correo o SMS. Responde lo mismo exista o no la cuenta; límite 5 / 15 min por IP (429) |
+| `POST /auth/recuperar/restablecer` | Body `{identificador, codigo, nuevaPassword}`. 204 si el código es válido (vence en 15 min, 5 intentos, un solo uso); 400 si no. También quita el bloqueo de inicio de sesión |
 
 ## Con sesión
 | Ruta | Métodos | Roles |

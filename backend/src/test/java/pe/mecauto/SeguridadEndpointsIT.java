@@ -57,6 +57,17 @@ class SeguridadEndpointsIT {
     }
 
     @Test
+    @DisplayName("Recuperar contraseña no pide token y no revela si el correo existe")
+    void recuperarEsPublico() throws Exception {
+        mvc.perform(post("/api/v1/auth/recuperar/solicitar").contentType("application/json")
+                        .content("{\"identificador\":\"nadie@taller.pe\"}"))
+                .andExpect(status().isOk());
+        mvc.perform(post("/api/v1/auth/recuperar/restablecer").contentType("application/json")
+                        .content("{\"identificador\":\"nadie@taller.pe\",\"codigo\":\"123456\",\"nuevaPassword\":\"NuevaClave2024\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("Login con datos vacíos responde 400 y no 200")
     void loginInvalido() throws Exception {
         mvc.perform(post("/api/v1/auth/login").contentType("application/json").content("{}"))
