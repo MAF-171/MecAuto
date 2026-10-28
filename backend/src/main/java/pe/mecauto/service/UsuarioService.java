@@ -17,6 +17,8 @@ import pe.mecauto.exception.RecursoNoEncontradoException;
 import pe.mecauto.mapper.PersonaMapper;
 import pe.mecauto.repository.UsuarioRepository;
 import pe.mecauto.security.UsuarioPrincipal;
+import pe.mecauto.exception.ValidacionException;
+import pe.mecauto.util.TelefonoUtil;
 import pe.mecauto.util.TextoUtil;
 
 import java.util.List;
@@ -63,6 +65,7 @@ public class UsuarioService {
         u.setRol(req.rol());
         u.setPasswordHash(encoder.encode(req.password()));
         u.setActivo(true);
+        asignarContacto(u, req.correo(), req.telefono());
         return PersonaMapper.aDto(repo.save(u));
     }
 
@@ -74,6 +77,7 @@ public class UsuarioService {
         }
         u.setNombre(req.nombre().trim());
         u.setRol(req.rol());
+        asignarContacto(u, req.correo(), req.telefono());
         return PersonaMapper.aDto(u);
     }
 
@@ -95,6 +99,29 @@ public class UsuarioService {
     @Transactional
     public void cambiarPassword(Long id, String nuevaPassword) {
         buscar(id).setPasswordHash(encoder.encode(nuevaPassword));
+    }
+
+    /** Correo y celular son opcionales, pero no pueden repetirse: con ellos se recupera la contraseña. */
+    private void asignarContacto(Usuario u, String correoTexto, String telefonoTexto) {
+        String correo = TextoUtil.aNullSiVacio(correoTexto);
+        if (correo != null) {
+            correo = correo.toLowerCase(Locale.ROOT);
+            if (repo.findByCorreo(correo).filter(otro -> !otro.getId().equals(u.getId())).isPresent()) {
+                throw new ConflictoException("Ese correo ya está registrado en otro usuario");
+            }
+        }
+        String telefono = null;
+        if (TextoUtil.aNullSiVacio(telefonoTexto) != null) {
+            telefono = TelefonoUtil.normalizar(telefonoTexto);
+            if (telefono == null) {
+                throw new ValidacionException("telefono", "Escribe un número de celular válido");
+            }
+            if (repo.findByTelefono(telefono).filter(otro -> !otro.getId().equals(u.getId())).isPresent()) {
+                throw new ConflictoException("Ese celular ya está registrado en otro usuario");
+            }
+        }
+        u.setCorreo(correo);
+        u.setTelefono(telefono);
     }
 
     private void exigirOtroAdministradorActivo(Usuario u) {

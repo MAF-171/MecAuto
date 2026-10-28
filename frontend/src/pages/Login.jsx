@@ -20,11 +20,12 @@ export default function Login() {
         <Campo etiqueta="Contraseña" error={f.errores.password}>
           <input type="password" value={f.valores.password} onChange={f.cambiar('password')} autoComplete="current-password" required />
         </Campo>
+        <p className="login-olvido"><Link to="/recuperar">¿Olvidaste tu contraseña?</Link></p>
         {f.errorGeneral && <div className="caja-error" role="alert">{f.errorGeneral}</div>}
         <button className="btn btn-pri" style={{ width: '100%' }} disabled={f.enviando || !f.valores.username || !f.valores.password}>
           {f.enviando ? 'Ingresando…' : 'Ingresar'}
         </button>
-        <p style={{ textAlign: 'center', marginBottom: 0 }}><Link to="/">← Volver al sitio</Link></p>
+        <Link to="/" className="login-volver">← Volver a la página</Link>
       </form>
     </div>
   );

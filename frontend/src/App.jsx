@@ -2,6 +2,7 @@ import { useRuta, coincide, navegar } from './lib/router.jsx';
 import { useAuth } from './lib/auth.jsx';
 import Inicio from './pages/public/Inicio.jsx';
 import Login from './pages/Login.jsx';
+import Recuperar from './pages/Recuperar.jsx';
 import PanelLayout from './pages/panel/PanelLayout.jsx';
 import { RUTAS_PANEL } from './pages/panel/rutas.jsx';
 import { useEffect } from 'react';
@@ -16,6 +17,7 @@ export default function App() {
   }, [enPanel, usuario]);
 
   if (path === '/login') return usuario ? <Redirigir a="/panel" /> : <Login />;
+  if (path === '/recuperar') return usuario ? <Redirigir a="/panel" /> : <Recuperar />;
   if (enPanel) {
     if (!usuario) return null;
     let pagina = null;

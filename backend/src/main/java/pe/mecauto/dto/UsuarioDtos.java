@@ -1,5 +1,6 @@
 package pe.mecauto.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -15,8 +16,10 @@ public final class UsuarioDtos {
 
     public static final String REGEX_PASSWORD = "^(?=.*[A-Za-z])(?=.*\\d).{10,72}$";
     public static final String MSG_PASSWORD = "La contraseña debe tener entre 10 y 72 caracteres, con letras y números";
+    public static final String MSG_CORREO = "Escribe un correo válido";
 
-    public record UsuarioDto(Long id, String username, String nombre, Rol rol, boolean activo, LocalDateTime creadoEn) {
+    public record UsuarioDto(Long id, String username, String nombre, Rol rol, boolean activo, LocalDateTime creadoEn,
+                             String correo, String telefono) {
     }
 
     public record UsuarioCrearRequest(
@@ -25,12 +28,16 @@ public final class UsuarioDtos {
             String username,
             @NotBlank(message = "El nombre es obligatorio") @Size(max = 100) String nombre,
             @NotNull(message = "Elige un rol") Rol rol,
-            @NotBlank(message = "La contraseña es obligatoria") @Pattern(regexp = REGEX_PASSWORD, message = MSG_PASSWORD) String password) {
+            @NotBlank(message = "La contraseña es obligatoria") @Pattern(regexp = REGEX_PASSWORD, message = MSG_PASSWORD) String password,
+            @Email(message = MSG_CORREO) @Size(max = 100) String correo,
+            @Size(max = 20) String telefono) {
     }
 
     public record UsuarioActualizarRequest(
             @NotBlank(message = "El nombre es obligatorio") @Size(max = 100) String nombre,
-            @NotNull(message = "Elige un rol") Rol rol) {
+            @NotNull(message = "Elige un rol") Rol rol,
+            @Email(message = MSG_CORREO) @Size(max = 100) String correo,
+            @Size(max = 20) String telefono) {
     }
 
     public record CambiarPasswordRequest(

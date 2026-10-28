@@ -38,6 +38,22 @@ CREATE TABLE dbo.usuario (
 );
 GO
 
+/* Correo y celular del usuario (opcionales): sirven para recuperar la contraseña con un código.
+   Se agregan con ALTER para que bases ya creadas también los reciban. Celular en formato +51987654321. */
+IF COL_LENGTH(N'dbo.usuario', N'correo') IS NULL
+    ALTER TABLE dbo.usuario ADD correo VARCHAR(100) NULL;
+GO
+IF COL_LENGTH(N'dbo.usuario', N'telefono') IS NULL
+    ALTER TABLE dbo.usuario ADD telefono VARCHAR(20) NULL;
+GO
+-- Únicos solo cuando tienen valor (varios usuarios pueden no tener correo o celular).
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_usuario_correo' AND object_id = OBJECT_ID(N'dbo.usuario'))
+    CREATE UNIQUE INDEX UX_usuario_correo ON dbo.usuario (correo) WHERE correo IS NOT NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_usuario_telefono' AND object_id = OBJECT_ID(N'dbo.usuario'))
+    CREATE UNIQUE INDEX UX_usuario_telefono ON dbo.usuario (telefono) WHERE telefono IS NOT NULL;
+GO
+
 /* ------------------------------------------------------------
    cliente (persona natural con DNI/CE o empresa con RUC)
    ------------------------------------------------------------ */

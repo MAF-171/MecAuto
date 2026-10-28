@@ -14,7 +14,8 @@ public final class PersonaMapper {
     }
 
     public static UsuarioDto aDto(Usuario u) {
-        return new UsuarioDto(u.getId(), u.getUsername(), u.getNombre(), u.getRol(), u.isActivo(), u.getCreadoEn());
+        return new UsuarioDto(u.getId(), u.getUsername(), u.getNombre(), u.getRol(), u.isActivo(), u.getCreadoEn(),
+                u.getCorreo(), u.getTelefono());
     }
 
     public static ClienteDto aDto(Cliente c, Long cantidadVehiculos) {
