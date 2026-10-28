@@ -154,7 +154,7 @@ cd backend
 mvn test
 ```
 
-* **Pruebas unitarias** (no necesitan base de datos): IGV, estados de orden, permisos por rol, horarios, validación de documentos y placas, reglas de inventario (Mockito).
+* **Pruebas unitarias** (no necesitan base de datos): IGV, estados de orden, permisos por rol, horarios, validación de documentos, placas y celulares, y las reglas de negocio de cada servicio con Mockito: clientes, vehículos, citas, órdenes de trabajo (flujo de estados e inventario), cotizaciones, comprobantes, inventario, usuarios y recuperación de contraseña. También JWT, bloqueo de inicio de sesión y límite anti-spam.
 * **Pruebas de integración** (`*IT.java`, H2 en memoria): protección de rutas por rol. **No usan SQL Server real.**
 * No hay pruebas automáticas contra SQL Server; se verifica con `consultas.sql` y uso manual.
 
