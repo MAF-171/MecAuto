@@ -2,7 +2,7 @@
 
 Proyecto académico (UTP, Ingeniería de Sistemas). Aplicación web para gestionar clientes, vehículos, citas, órdenes de trabajo, inventario, cotizaciones y comprobantes internos de un taller mecánico, con un sitio público para solicitar citas.
 
-> **Estado del proyecto:** el sistema se compiló, se arrancó y se recorrió de punta a punta (cliente → vehículo → orden → repuesto → comprobante) en una PC con Windows, JDK 21, Maven y SQL Server; las 35 pruebas unitarias pasan. Qué se verificó, qué se corrigió y qué **falta** verificar está detallado en [`docs/VERIFICACION.md`](docs/VERIFICACION.md).
+> **Estado del proyecto:** el sistema se compiló, se arrancó y se recorrió de punta a punta (cliente → vehículo → orden → repuesto → comprobante) en una PC con Windows, JDK 21, Maven y SQL Server; las 138 pruebas automáticas (23 clases) pasan con `mvn test`. Qué se verificó, qué se corrigió y qué **falta** verificar está detallado en [`docs/VERIFICACION.md`](docs/VERIFICACION.md).
 
 ## 1. Tecnologías
 
@@ -15,6 +15,49 @@ Proyecto académico (UTP, Ingeniería de Sistemas). Aplicación web para gestion
 | Editor | Visual Studio Code |
 
 Desviaciones respecto al documento académico (ver [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md)): el CRUD usa Spring Data JPA y las consultas SQL directas (por ejemplo, documento duplicado de clientes) pasan por un DAO con JdbcTemplate; SQL Server en vez de MySQL (lo exige el enunciado del proyecto); Guava y Apache Commons Lang 3 se usan en validaciones y utilidades; y un enrutador/cliente HTTP propios sustituyen a React Router/Axios para no depender de más librerías.
+
+### 1.1 Librerías del backend (`backend/pom.xml`)
+
+Spring Boot administra las versiones de las dependencias que no llevan versión propia; las demás se declaran como propiedades en el `pom.xml`.
+
+| Librería (artifact) | Versión | Para qué se usa en MecAuto |
+|---|---|---|
+| `spring-boot-starter-web` | 3.4.5 | API REST (`@RestController`, prefijo `/api/v1`), Jackson para JSON y Tomcat embebido. |
+| `spring-boot-starter-data-jpa` | 3.4.5 | Entidades y repositorios (Spring Data JPA con Hibernate). Hibernate **no** modifica el esquema (`ddl-auto=none`). |
+| `mssql-jdbc` | gestionada por Spring Boot | Driver oficial de Microsoft para conectarse a SQL Server. Lo usan JPA y el DAO con `JdbcTemplate`. |
+| `spring-boot-starter-security` | 3.4.5 | Autenticación, autorización por rol con `@PreAuthorize` y cifrado de contraseñas con BCrypt. |
+| `jjwt-api` / `jjwt-impl` / `jjwt-jackson` | 0.12.6 | Creación y verificación de tokens JWT firmados (inicio de sesión sin estado). |
+| `spring-boot-starter-validation` | 3.4.5 | Validación de datos de entrada con `@Valid`, `@NotBlank`, `@Size`, `@Pattern`, `@Email`. |
+| `spring-boot-starter-mail` | 3.4.5 | Envío del código de recuperación de contraseña por correo (SMTP). |
+| `spring-boot-starter-actuator` | 3.4.5 | Endpoint de salud `/actuator/health`. Solo se expone `health` e `info`. |
+| `springdoc-openapi-starter-webmvc-ui` | 2.8.6 | Documentación interactiva de la API (Swagger UI) en `/swagger-ui.html`. |
+| `poi-ooxml` (Apache POI) | 5.4.0 | Exportación de reportes a Excel (`ExcelExporter`, solo administrador). |
+| **`guava`** (Google Guava) | 33.4.8-jre | `Preconditions` valida cantidad y stock en `InventarioService`; `Sets` compara colecciones de vehículos en `ClienteService`. |
+| **`commons-lang3`** (Apache Commons Lang) | gestionada por Spring Boot | `StringUtils` normaliza placas y textos de búsqueda (`PlacaUtil`, `TextoUtil`, `SeguimientoService`). |
+| **Logback** (viene con Spring Boot) | gestionada por Spring Boot | Registro de eventos en `logs/mecauto.log`: 5 MB por archivo y hasta 14 archivos. Se configura en `application.properties`. |
+| `lombok` | gestionada por Spring Boot | Reduce código repetitivo (opcional, solo en compilación). |
+| `spring-boot-starter-test` (JUnit 5, Mockito, AssertJ) | 3.4.5 | Pruebas unitarias y de integración (`test`). |
+| `spring-security-test` | gestionada por Spring Boot | Simula usuarios con rol en las pruebas de seguridad (`test`). |
+| `h2` | gestionada por Spring Boot | Base en memoria **solo para pruebas de integración**; la aplicación usa SQL Server. |
+
+Las cuatro librerías pedidas en el curso son **Guava, Apache POI, Apache Commons Lang y Logback**.
+
+### 1.2 Librerías del frontend (`frontend/package.json`)
+
+| Librería | Versión | Uso |
+|---|---|---|
+| `react` / `react-dom` | ^18.3.1 | Interfaz de usuario por componentes. |
+| `vite` (desarrollo) | ^6.0.0 | Servidor de desarrollo (con proxy `/api` → backend) y empaquetado (`npm run build`). |
+| `@vitejs/plugin-react` (desarrollo) | ^4.3.4 | Soporte de JSX y recarga rápida en Vite. |
+
+No se usan React Router ni Axios: el enrutador por hash y el cliente `fetch` son propios (`frontend/src/lib`), para depender de menos librerías.
+
+### 1.3 Cómo se agregan o actualizan librerías
+
+1. Edita `backend/pom.xml` (nueva `<dependency>`; si necesita versión, defínela en `<properties>`).
+2. Ejecuta `mvn -q dependency:tree` para ver el árbol completo, incluidas las dependencias transitivas (por ejemplo, Logback llega con `spring-boot-starter`).
+3. Ejecuta `mvn test` antes de subir el cambio.
+4. En el frontend usa `npm install <paquete>` y sube `package.json` y `package-lock.json`.
 
 ## 2. Estructura del repositorio
 
@@ -136,7 +179,49 @@ Abre <http://localhost:5173>. Vite reenvía `/api` al backend (`http://localhost
 | Usuarios | ✔ | — | — |
 | Configuración | editar | ver | — |
 
-## 10. Módulos y reglas principales
+## 10. Seguridad
+
+La seguridad se aplica en el **servidor**; ocultar un botón en el frontend nunca se considera protección. Las clases están en `backend/src/main/java/pe/mecauto/security` y `config/SecurityConfig.java`.
+
+| Aspecto | Qué hace MecAuto | Dónde se ve |
+|---|---|---|
+| **Autenticación** | Inicio de sesión con usuario y contraseña. El servidor devuelve un **JWT** firmado (HMAC) con el usuario, su id y su rol; dura 480 minutos por defecto (`MECAUTO_JWT_MINUTOS`). | `JwtService`, `JwtAuthFilter` |
+| **Sin sesiones** | La API es *stateless*: no guarda sesión ni cookies. El token viaja en el encabezado `Authorization: Bearer …`. Por eso CSRF está desactivado a propósito. | `SecurityConfig` |
+| **Secreto del token** | `MECAUTO_JWT_SECRET` de **32+ caracteres**, sin valor por defecto: si falta o es corta, la aplicación no arranca. | `application.properties` |
+| **Contraseñas** | Se guardan solo como hash **BCrypt (costo 12)**. Entre 10 y 72 caracteres, con letras y números. No hay contraseña de administrador por defecto. | `SecurityConfig`, `UsuarioService` |
+| **Autorización por rol** | Tres roles (Administrador, Recepción, Mecánico). Cada endpoint protegido lleva `@PreAuthorize` (más de 50 en los controladores); además el servicio revisa reglas como «el mecánico solo ve sus órdenes». Ver la tabla de la sección 9. | Controladores y servicios |
+| **Rutas públicas** | Solo `/api/v1/public/**`, el login, la recuperación de contraseña, `/actuator/health` y Swagger. Todo lo demás exige token. Una petición sin token o sin permiso recibe 401 o 403 con un mensaje uniforme. | `SecurityConfig`, `RestSecurityHandlers` |
+| **Bloqueo por intentos** | 5 intentos fallidos seguidos de un usuario bloquean su acceso por **15 minutos**. El estado vive en memoria (se reinicia con el servidor). | `LoginAttemptService` |
+| **Recuperación de contraseña** | Código de **6 dígitos** generado con `SecureRandom`, enviado al correo o celular registrado. Vence en **15 minutos**, admite **5 intentos** y se guarda solo como hash. | `RecuperacionPasswordService` |
+| **Validación de entrada** | Los DTO usan Bean Validation (`@Valid`, `@NotBlank`, `@Size`, `@Pattern`, `@Email`); además hay validación de documento, placa y celular en clases de utilidad. | `dto/`, `util/` |
+| **SQL seguro** | JPA y `JdbcTemplate` con parámetros (`?`); nunca se concatenan datos del usuario en una consulta (evita inyección SQL). | `dao/ClienteDAOImpl` |
+| **CORS** | Solo los orígenes de `MECAUTO_CORS_ORIGENES` (por defecto `http://localhost:5173`); métodos y encabezados limitados; sin credenciales. | `SecurityConfig` |
+| **Sitio público** | Citas con límite por IP (5 solicitudes cada 10 minutos por defecto) y un campo trampa (`sitioWeb`) que descarta robots. El seguimiento de una orden exige el código de la orden y los últimos caracteres de la placa, y devuelve solo un resumen (estado, placa, servicio). | `PublicController`, `CitaService`, `SeguimientoService` |
+| **Datos en tránsito** | La conexión a SQL Server se cifra por defecto (`encrypt=true;trustServerCertificate=false`). `trustServerCertificate=true` solo se permite en la PC de desarrollo. | `MECAUTO_DB_URL` |
+| **Mínimo privilegio en la base** | El login `mecauto_app` solo tiene lectura y escritura sobre la base `MECAUTO`; no es administrador del servidor. | `database/crear-usuario-app.sql` |
+| **Secretos fuera del repositorio** | Claves, JWT y SMTP llegan por variables de entorno; `backend/.env.local` queda fuera de Git (`.gitignore` ignora `.env` y `*.local`). Solo se versiona `env.example`. | `.gitignore` |
+| **Errores y logs** | Un manejador global devuelve mensajes uniformes sin detalles internos (sin *stack traces*). Los logs no guardan contraseñas ni tokens; el código de recuperación solo se escribe si activas `MECAUTO_CODIGO_EN_LOG` (desarrollo). | `GlobalExceptionHandler` |
+| **Integridad de datos** | Stock sin negativos (validación, bloqueo de fila y `CHECK` en SQL Server); estados de la orden sin saltos; borrado lógico para conservar el historial. | Servicios y `schema.sql` |
+| **Frontend** | El token se guarda en `sessionStorage` (se borra al cerrar la pestaña) y React escapa el contenido, por lo que no se usa `dangerouslySetInnerHTML`. | `frontend/src/lib/api.js` |
+| **Pruebas** | `JwtServiceTest`, `LoginAttemptServiceTest`, `RecuperacionPasswordServiceTest`, pruebas de permisos por rol y `SeguridadEndpointsIT` (rutas protegidas). | `backend/src/test` |
+
+### Límites conocidos (conviene decirlos)
+
+* El bloqueo por intentos y los códigos de recuperación viven en **memoria**: se pierden al reiniciar el backend y no funcionan con varias instancias a la vez.
+* El token no se puede revocar antes de que venza (vence en 8 horas); cerrar sesión solo lo borra del navegador.
+* La aplicación no fuerza HTTPS por sí sola: en un servidor real debe ir detrás de un proxy o servidor con certificado.
+* Las credenciales de `seed-demo-completo.sql` (`Demo2026!`) son solo de demostración: cámbialas o desactívalas antes de usar datos reales.
+* No son comprobantes electrónicos de SUNAT.
+
+### Lista de comprobación antes de publicar
+
+1. Cambiar `MECAUTO_JWT_SECRET`, la clave de `mecauto_app` y la contraseña del administrador.
+2. Quitar `MECAUTO_ADMIN_*` después del primer arranque.
+3. `MECAUTO_CODIGO_EN_LOG=false` y `trustServerCertificate=false`.
+4. `MECAUTO_CORS_ORIGENES` con el dominio real y HTTPS delante del sistema.
+5. Opcional: `MECAUTO_DOCS=false` para ocultar Swagger.
+
+## 11. Módulos y reglas principales
 
 * **Sitio público:** servicios y datos de contacto leídos de la base; formulario de cita con horarios reales (capacidad por franja); protección anti-spam (límite por IP y campo trampa).
 * **Órdenes de trabajo:** estados `Recibida → En diagnóstico → En reparación → Completada → Entregada` (o `Cancelada`), sin saltos ni retrocesos; historial de cada cambio.
@@ -147,7 +232,7 @@ Abre <http://localhost:5173>. Vite reenvía `/api` al backend (`http://localhost
 * **Reportes:** 11 reportes con filtro de fechas, impresión y exportación a Excel (solo administrador).
 * **Borrado lógico:** clientes, vehículos, servicios, repuestos y usuarios se desactivan; no se eliminan para conservar el historial.
 
-## 11. Pruebas
+## 12. Pruebas
 
 ```powershell
 cd backend
@@ -160,7 +245,7 @@ mvn test
 
 Qué se ejecutó realmente y qué falta: [`docs/VERIFICACION.md`](docs/VERIFICACION.md).
 
-## 12. Solución de problemas
+## 13. Solución de problemas
 
 | Síntoma | Causa probable y solución |
 |---|---|
@@ -175,7 +260,7 @@ Qué se ejecutó realmente y qué falta: [`docs/VERIFICACION.md`](docs/VERIFICAC
 | El frontend muestra «No se pudo conectar con el servidor» | El backend no está levantado o no está en el puerto 8080 (`MECAUTO_API` cambia el destino del proxy de Vite). |
 | Error de compilación en `mvn` | Cópialo completo (archivo y línea). El backend sí compiló en la PC del equipo (ver `docs/VERIFICACION.md`); revisa que uses JDK 21 y que Maven use ese JDK (`mvn -version`). |
 
-## 13. Documentación
+## 14. Documentación
 
 * [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) — capas, modelo de datos, casos de uso, diagramas de clases y secuencia.
 * [`docs/API.md`](docs/API.md) — endpoints principales y permisos.
