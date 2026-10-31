@@ -2,7 +2,7 @@
 
 Proyecto académico (UTP, Ingeniería de Sistemas). Aplicación web para gestionar clientes, vehículos, citas, órdenes de trabajo, inventario, cotizaciones y comprobantes internos de un taller mecánico, con un sitio público para solicitar citas.
 
-> **Estado del proyecto:** el sistema se compiló, se arrancó y se recorrió de punta a punta (cliente → vehículo → orden → repuesto → comprobante) en una PC con Windows, JDK 21, Maven y SQL Server; las 138 pruebas automáticas (23 clases) pasan con `mvn test`. Qué se verificó, qué se corrigió y qué **falta** verificar está detallado en [`docs/VERIFICACION.md`](docs/VERIFICACION.md).
+> **Estado del proyecto:** el sistema se compiló, se arrancó y se recorrió de punta a punta (cliente → vehículo → orden → repuesto → comprobante) en una PC con Windows, JDK 21, Maven y SQL Server; las 141 pruebas automáticas (24 clases) pasan con `mvn test`. Qué se verificó, qué se corrigió y qué **falta** verificar está detallado en [`docs/VERIFICACION.md`](docs/VERIFICACION.md).
 
 ## 1. Tecnologías
 
@@ -31,7 +31,7 @@ Spring Boot administra las versiones de las dependencias que no llevan versión 
 | `spring-boot-starter-mail` | 3.4.5 | Envío del código de recuperación de contraseña por correo (SMTP). |
 | `spring-boot-starter-actuator` | 3.4.5 | Endpoint de salud `/actuator/health`. Solo se expone `health` e `info`. |
 | `springdoc-openapi-starter-webmvc-ui` | 2.8.6 | Documentación interactiva de la API (Swagger UI) en `/swagger-ui.html`. |
-| `poi-ooxml` (Apache POI) | 5.4.0 | Exportación de reportes a Excel (`ExcelExporter`, solo administrador). |
+| `poi-ooxml` (Apache POI) | 5.4.0 | Exportación de reportes a Excel (`ExcelExporter`, solo administrador): franja con el logo (`resources/branding/logo-reporte.png`), encabezado en rojo, filtros e impresión lista. |
 | **`guava`** (Google Guava) | 33.4.8-jre | `Preconditions` valida cantidad y stock en `InventarioService`; `Sets` compara colecciones de vehículos en `ClienteService`. |
 | **`commons-lang3`** (Apache Commons Lang) | gestionada por Spring Boot | `StringUtils` normaliza placas y textos de búsqueda (`PlacaUtil`, `TextoUtil`, `SeguimientoService`). |
 | **Logback** (viene con Spring Boot) | gestionada por Spring Boot | Registro de eventos en `logs/mecauto.log`: 5 MB por archivo y hasta 14 archivos. Se configura en `application.properties`. |
@@ -239,7 +239,7 @@ cd backend
 mvn test
 ```
 
-* **Pruebas unitarias** (no necesitan base de datos): IGV, estados de orden, permisos por rol, horarios, validación de documentos, placas y celulares, y las reglas de negocio de cada servicio con Mockito: clientes, vehículos, citas, órdenes de trabajo (flujo de estados e inventario), cotizaciones, comprobantes, inventario, usuarios y recuperación de contraseña. También JWT, bloqueo de inicio de sesión y límite anti-spam.
+* **Pruebas unitarias** (no necesitan base de datos): IGV, estados de orden, permisos por rol, horarios, validación de documentos, placas y celulares, y las reglas de negocio de cada servicio con Mockito: clientes, vehículos, citas, órdenes de trabajo (flujo de estados e inventario), cotizaciones, comprobantes, inventario, usuarios y recuperación de contraseña, además de la exportación de reportes a Excel (`ExcelExporterTest`: logo, importes numéricos y texto seguro). También JWT, bloqueo de inicio de sesión y límite anti-spam.
 * **Pruebas de integración** (`*IT.java`, H2 en memoria): protección de rutas por rol. **No usan SQL Server real.**
 * No hay pruebas automáticas contra SQL Server; se verifica con `consultas.sql` y uso manual.
 
