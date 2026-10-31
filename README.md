@@ -69,7 +69,27 @@ MecAuto/
 ├── database/           schema.sql · seed.sql · seed-demo.sql · seed-demo-completo.sql · crear-usuario-app.sql · consultas.sql
 ├── docs/               arquitectura, API, patrones, verificación
 └── .vscode/            extensiones, lanzador, tareas
+
 ```
+## Equipo y responsabilidades
+
+Proyecto del curso de Ingeniería de Sistemas — UTP.
+
+| Integrante | Código | GitHub | Responsabilidad principal |
+|---|---|---|---|
+| Miguel Angel Flores Hualinga (jefe de proyecto) | U19202961 | [@MAF-171](https://github.com/MAF-171) | Contexto y problema, Lean Canvas, alcance, integración del repositorio y del documento final |
+| Jairo Ernesto Ramos Hidalgo | U19311177 | [@Romeo2111](https://github.com/Romeo2111) | Alternativas de solución, especificación de requisitos (SRS) |
+| Fabian Adriano Chafio Chumioque | U24220385 | [@adrianochafiochumioque-commits](https://github.com/adrianochafiochumioque-commits) | Proceso de desarrollo, arquitectura, patrones, base de datos, diagrama de clases, acta de constitución |
+| Renzo Gerardo Butron Nina | U24203388 | [@rgbn120897](https://github.com/rgbn120897) | Mockups y pantallas, base de datos conectada, comprobantes, conclusiones |
+| Freddy Adbre Berru Sanchez | U22220696 | [@freddykae15-sketch](https://github.com/freddykae15-sketch) | GitHub, librerías, pruebas TDD (`mvn test`) |
+
+Cada integrante trabajó en su propia rama (`feature/...`) y se integró mediante Pull Request. El historial real está en la pestaña *Contributors* y en `git shortlog -sn`.
+
+## Documentación por parte
+- [Frontend](frontend/README.md) — React + Vite, pantallas y rutas
+- [Backend](backend/README.md) — API Spring Boot, seguridad y reglas de negocio
+- [Base de datos](database/README.md) — scripts, tablas e integridad
+
 
 ## 3. Requisitos previos (Windows)
 
