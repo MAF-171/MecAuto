@@ -1,4 +1,4 @@
-/* =====================================================================
+﻿/* =====================================================================
    MecAuto - Usuario de SQL Server para la aplicación (opcional, recomendado)
    Archivo: database/crear-usuario-app.sql
 
@@ -15,7 +15,7 @@
 USE master;
 GO
 
-DECLARE @Clave NVARCHAR(128) = N'MECAUTOFLORES61305069';   -- <== escriba aquí una contraseña fuerte (mín. 12 caracteres)
+DECLARE @Clave NVARCHAR(128) = N'CAMBIAR_ESTA_CLAVE';   -- <== escriba aquí una contraseña fuerte (mín. 12 caracteres)
 
 IF @Clave = N'CAMBIAR_ESTA_CLAVE'
     THROW 50000, N'Edite la contraseña (@Clave) antes de ejecutar este script.', 1;
@@ -42,3 +42,4 @@ GO
 
 PRINT N'Usuario mecauto_app listo. Úselo en MECAUTO_DB_USER y MECAUTO_DB_PASSWORD del backend.';
 GO
+
