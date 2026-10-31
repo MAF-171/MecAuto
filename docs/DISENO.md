@@ -66,3 +66,11 @@ El script `database/schema.sql` es idempotente (se puede repetir sin borrar dato
 | Cap. 4 Pruebas, despliegue y entrega | 20/11 – 30/11 | 11 días |
 
 **Entregables:** documento de análisis y diseño, sistema web funcional, repositorio GitHub y script de base de datos, manuales de usuario y técnico, informe final.
+
+## 6. Decisiones de diseño
+
+- **Arquitectura por capas:** el controlador solo recibe la petición y delega en el servicio; las reglas de negocio (estados de la orden, IGV, stock) viven en el servicio y el acceso a datos queda aislado en repositorios y DAO. Así cada capa se puede probar por separado.
+- **JPA y DAO con JdbcTemplate:** el CRUD usa Spring Data JPA por rapidez de desarrollo; las consultas SQL puntuales (por ejemplo, documento duplicado de un cliente) pasan por `ClienteDAO` con `JdbcTemplate`, para mostrar el patrón DAO y controlar el SQL.
+- **Estados de la orden con reglas:** la orden avanza RECIBIDA → EN_DIAGNOSTICO → EN_REPARACION → COMPLETADA → ENTREGADA, sin saltos ni retrocesos; solo puede cancelarse antes de completarse. La regla está en el dominio y tiene pruebas automáticas.
+- **Autenticación sin sesión (JWT):** el servidor no guarda sesiones; cada petición lleva su token. Esto simplifica el despliegue y encaja con un frontend independiente en React.
+- **SQL Server como base de datos:** lo exige el enunciado del proyecto; el esquema se versiona en `database/schema.sql` para poder recrearlo en cualquier equipo.
