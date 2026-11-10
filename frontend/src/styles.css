@@ -68,7 +68,7 @@ input[type=checkbox]{width:auto}
 .fila-click{cursor:pointer} .fila-click:hover{background:#fafbfc}
 .paginacion{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.8rem .2rem;color:var(--gris-500);font-size:.85rem;flex-wrap:wrap} .paginacion div{display:flex;gap:.4rem}
 .pagina-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap}
-.pagina-cab .sub{margin:0;color:var(--gris-500)} .acciones{display:flex;gap:.5rem;flex-wrap:wrap}
+.pagina-cab .sub{margin:0;color:var(--gris-500)} .acciones{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
 .pie-acciones{display:flex;gap:.5rem;flex-wrap:wrap}
 @media(max-width:700px){
   .tabla-resp thead{display:none}

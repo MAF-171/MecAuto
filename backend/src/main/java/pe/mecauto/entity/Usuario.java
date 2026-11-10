@@ -30,12 +30,16 @@ public class Usuario {
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    /** Correo y celular sirven para recuperar la contraseña; ambos son opcionales y únicos. */
-    @Column(name = "correo", length = 100, unique = true)
+    /**
+     * Correo y celular sirven para recuperar la contraseña; ambos son opcionales y no se repiten.
+     * La unicidad la controla UsuarioService y, en SQL Server, un índice filtrado (WHERE ... IS NOT NULL) de schema.sql.
+     * No se usa unique = true: SQL Server trata dos NULL como repetidos y no se podría tener dos usuarios sin correo.
+     */
+    @Column(name = "correo", length = 100)
     private String correo;
 
     /** Celular en formato internacional (+51987654321). */
-    @Column(name = "telefono", length = 20, unique = true)
+    @Column(name = "telefono", length = 20)
     private String telefono;
 
     @Enumerated(EnumType.STRING)
