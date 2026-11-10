@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../lib/api';
 import { soles, hoyISO } from '../../lib/format';
-import { Campo, useFormulario, nulo, num } from '../../components/ui.jsx';
+import { AvisoNoDisponible, Campo, useFormulario, nulo, num } from '../../components/ui.jsx';
 import { categoriaDe, IconoCategoria } from '../../lib/servicios.jsx';
 
 const PASOS = ['Servicio', 'Día y hora', 'Tus datos', 'Confirmar'];
@@ -30,7 +30,7 @@ const hhmm = (h) => String(h).slice(0, 5);
  * Reserva de cita en 4 pasos: servicio → día y hora → tus datos → confirmar.
  * Usa los mismos endpoints públicos de siempre (/public/citas/disponibilidad y /public/citas).
  */
-export default function ReservaPasos({ servicios, servicioElegido, horarioTexto }) {
+export default function ReservaPasos({ servicios, cargando, sinConexion, onReintentar, whatsapp, servicioElegido, horarioTexto }) {
   const [paso, setPaso] = useState(1);
   const [servicioId, setServicioId] = useState('');
   const [fecha, setFecha] = useState('');
@@ -152,7 +152,12 @@ export default function ReservaPasos({ servicios, servicioElegido, horarioTexto 
           <>
             <h3>¿Qué servicio necesitas?</h3>
             <p className="rp-sub">Elige uno. Si no estás seguro, el taller te orienta con el diagnóstico.</p>
-            {servicios.length === 0 && <div className="estado-vacio">Pronto publicaremos nuestro catálogo de servicios.</div>}
+            {cargando && <div className="estado-vacio">Cargando servicios…</div>}
+            {sinConexion && <AvisoNoDisponible whatsapp={whatsapp} onReintentar={onReintentar}
+              texto="Ahora mismo no podemos registrar citas en línea. Puedes reintentar en unos segundos o pedir tu cita por WhatsApp." />}
+            {!cargando && !sinConexion && servicios.length === 0 && (
+              <AvisoNoDisponible whatsapp={whatsapp} texto="Pronto publicaremos nuestro catálogo. Mientras tanto, pide tu cita por WhatsApp." />
+            )}
             <div className="rp-servicios">
               {servicios.map((s) => (
                 <button type="button" key={s.id} className="rp-serv" aria-pressed={servicioId === String(s.id)} onClick={() => setServicioId(String(s.id))}>

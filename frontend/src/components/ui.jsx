@@ -158,12 +158,32 @@ export function Logo() {
 
 /* ------------------------------------------------------------ WhatsApp flotante */
 /** Botón fijo de WhatsApp. Solo aparece si el taller configuró su número (clave «whatsapp»). */
-export function WhatsAppFlotante({ numero }) {
+/** Enlace wa.me para un número; null si no parece un número válido. 9 dígitos = celular de Perú sin código de país. */
+export function enlaceWhatsApp(numero) {
   const d = String(numero || '').replace(/\D/g, '');
   if (d.length < 9) return null;
-  const tel = d.length === 9 ? '51' + d : d; // 9 dígitos = celular de Perú sin código de país
+  return 'https://wa.me/' + (d.length === 9 ? '51' + d : d);
+}
+
+/** Aviso para el público cuando el servidor no responde: sin códigos técnicos y con una salida (reintentar o WhatsApp). */
+export function AvisoNoDisponible({ texto, whatsapp, onReintentar }) {
+  const wa = enlaceWhatsApp(whatsapp);
   return (
-    <a className="wa-flotante" href={`https://wa.me/${tel}`} target="_blank" rel="noopener noreferrer" aria-label="Escribir por WhatsApp">
+    <div className="aviso-pub" role="status">
+      <p>{texto}</p>
+      <div className="aviso-pub-acciones">
+        {onReintentar && <button type="button" className="btn btn-sec btn-sm" onClick={onReintentar}>Reintentar</button>}
+        {wa && <a className="btn btn-wa btn-sm" href={wa} target="_blank" rel="noopener noreferrer">Escríbenos por WhatsApp</a>}
+      </div>
+    </div>
+  );
+}
+
+export function WhatsAppFlotante({ numero }) {
+  const wa = enlaceWhatsApp(numero);
+  if (!wa) return null;
+  return (
+    <a className="wa-flotante" href={wa} target="_blank" rel="noopener noreferrer" aria-label="Escribir por WhatsApp">
       <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 2.5a9.5 9.5 0 0 0-8.1 14.4L2.5 21.5l4.7-1.3A9.5 9.5 0 1 0 12 2.5z" fill="#fff" />
         <path d="M8.6 7.8c0 3.8 3.1 6.9 6.9 6.9l1-1.7-2.1-1.1-1 .9a4.3 4.3 0 0 1-2.3-2.3l.9-1-1.1-2.1z" fill="#25D366" />

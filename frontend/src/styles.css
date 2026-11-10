@@ -68,7 +68,7 @@ input[type=checkbox]{width:auto}
 .fila-click{cursor:pointer} .fila-click:hover{background:#fafbfc}
 .paginacion{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.8rem .2rem;color:var(--gris-500);font-size:.85rem;flex-wrap:wrap} .paginacion div{display:flex;gap:.4rem}
 .pagina-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.1rem;flex-wrap:wrap}
-.pagina-cab .sub{margin:0;color:var(--gris-500)} .acciones{display:flex;gap:.5rem;flex-wrap:wrap}
+.pagina-cab .sub{margin:0;color:var(--gris-500)} .acciones{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
 .pie-acciones{display:flex;gap:.5rem;flex-wrap:wrap}
 @media(max-width:700px){
   .tabla-resp thead{display:none}
@@ -148,10 +148,24 @@ input[type=checkbox]{width:auto}
 /* ----- Sitio público ----- */
 .pub-nav{position:sticky;top:0;z-index:30;background:rgba(8,8,8,.96);color:#fff;backdrop-filter:blur(6px)}
 .pub-nav .in{max-width:1120px;margin:0 auto;padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.aviso-pub{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.8rem 1.2rem;background:#fff;border:1px solid var(--gris-300);border-left:4px solid var(--warn);border-radius:10px;padding:.9rem 1.1rem;margin:.5rem 0 1rem;box-shadow:var(--sombra)}
+.aviso-pub p{margin:0;color:var(--gris-700);flex:1 1 260px} .aviso-pub-acciones{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn-wa{background:#25D366;color:#fff} .btn-wa:hover{background:#1ebe5a}
+.pub-menu-btn{display:none;background:none;border:1px solid rgba(255,255,255,.3);border-radius:8px;width:42px;height:38px;padding:0;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.pub-menu-btn span{display:block;width:20px;height:2px;background:#fff;border-radius:2px;transition:transform .2s ease,opacity .2s ease}
+.pub-nav.abierto .pub-menu-btn span:nth-child(1){transform:translateY(7px) rotate(45deg)} .pub-nav.abierto .pub-menu-btn span:nth-child(2){opacity:0} .pub-nav.abierto .pub-menu-btn span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 .pub-nav .marca{color:#fff} .pub-nav nav{display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap}
 .pub-nav nav a{color:#d8dbe0;text-decoration:none;font-size:.92rem;font-weight:500} .pub-nav nav a:hover{color:#fff}
 .pub-nav nav a.btn{color:var(--texto)}
 .pub-nav nav a:not(.btn){position:relative;padding:.2rem 0} .pub-nav nav a:not(.btn)::after{content:"";position:absolute;left:0;bottom:-2px;height:2px;width:100%;background:var(--rojo);transform:scaleX(0);transform-origin:left;transition:transform .25s ease} .pub-nav nav a:not(.btn):hover::after{transform:scaleX(1)}
+@media(max-width:760px){
+  .pub-menu-btn{display:flex}
+  .pub-nav nav{display:none;width:100%;flex-direction:column;align-items:stretch;gap:0;padding:.3rem 0 .6rem}
+  .pub-nav.abierto nav{display:flex}
+  .pub-nav nav a:not(.btn){padding:.75rem .2rem;border-bottom:1px solid rgba(255,255,255,.08);font-size:1rem}
+  .pub-nav nav a:not(.btn)::after{display:none}
+  .pub-nav nav a.btn{margin-top:.7rem}
+}
 .etiqueta{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#b3050f}
 .etiqueta-clara{color:#ff6b72;border:1px solid rgba(255,107,114,.45);border-radius:999px;padding:.3rem .85rem}
 .btn-lg{padding:.85rem 1.7rem;font-size:1rem}

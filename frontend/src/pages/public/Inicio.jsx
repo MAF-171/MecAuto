@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../lib/api';
 import { soles, hoyISO } from '../../lib/format';
-import { Logo, WhatsAppFlotante } from '../../components/ui.jsx';
+import { AvisoNoDisponible, Logo, WhatsAppFlotante } from '../../components/ui.jsx';
 import { Link } from '../../lib/router.jsx';
 import { CATEGORIAS, categoriaDe, IconoCategoria } from '../../lib/servicios.jsx';
 import { conReferencia } from '../../lib/referencia.js';
@@ -30,7 +30,7 @@ function useRevelar() {
   }, []);
 }
 
-/** Próximos horarios libres de hoy, según la disponibilidad real del taller (hasta 3). */
+/** Próximos horarios libres de hoy, según la disponibilidad real del taller (hasta 3). 'error' si no se pudo consultar. */
 function useHorariosHoy() {
   const [horas, setHoras] = useState(null);
   useEffect(() => {
@@ -42,7 +42,7 @@ function useHorariosHoy() {
         const ahora = new Date().toTimeString().slice(0, 5);
         setHoras(d.franjas.filter((f) => f.libres > 0 && f.hora.slice(0, 5) > ahora).slice(0, 3).map((f) => f.hora.slice(0, 5)));
       })
-      .catch(() => vivo && setHoras([]));
+      .catch(() => vivo && setHoras('error'));
     return () => { vivo = false; };
   }, []);
   return horas;
@@ -55,12 +55,19 @@ export default function Inicio() {
   const [errServ, setErrServ] = useState('');
   const [categoria, setCategoria] = useState('Todos');
   const [servicioElegido, setServicioElegido] = useState(null);
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const horasHoy = useHorariosHoy();
   useRevelar();
 
+  function cargarServicios() {
+    setErrServ('');
+    setServicios(null);
+    api.get('/public/servicios').then(setServicios).catch(() => setErrServ('sin-conexion'));
+  }
+
   useEffect(() => {
     api.get('/public/taller').then(setTaller).catch(() => {});
-    api.get('/public/servicios').then(setServicios).catch((e) => setErrServ(e.message));
+    cargarServicios();
   }, []);
 
   const nombre = taller.nombre_taller || 'Taller Mecánico MecAuto';
@@ -72,10 +79,14 @@ export default function Inicio() {
 
   return (
     <>
-      <header className="pub-nav">
+      <header className={'pub-nav' + (menuAbierto ? ' abierto' : '')}>
         <div className="in">
           <Logo />
-          <nav aria-label="Principal">
+          <button type="button" className="pub-menu-btn" aria-expanded={menuAbierto} aria-controls="menu-principal"
+            aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'} onClick={() => setMenuAbierto((v) => !v)}>
+            <span /><span /><span />
+          </button>
+          <nav id="menu-principal" aria-label="Principal" onClick={(e) => { if (e.target.closest('a')) setMenuAbierto(false); }}>
             <a href="#servicios" onClick={ir('servicios')}>Servicios</a>
             <a href="#proceso" onClick={ir('proceso')}>Cómo trabajamos</a>
             <a href="#cita" onClick={ir('cita')}>Solicitar cita</a>
@@ -102,12 +113,13 @@ export default function Inicio() {
             <div className="hero-horarios">
               <small>Horarios libres hoy</small>
               {horasHoy === null && <span className="hero-nota">Consultando…</span>}
-              {horasHoy && horasHoy.length > 0 && (
+              {horasHoy === 'error' && <span className="hero-nota">Elige tu horario en «Solicitar cita» o escríbenos por WhatsApp.</span>}
+              {Array.isArray(horasHoy) && horasHoy.length > 0 && (
                 <div className="hero-chips">
                   {horasHoy.map((h) => <a key={h} href="#cita" onClick={ir('cita')}>{h}</a>)}
                 </div>
               )}
-              {horasHoy && horasHoy.length === 0 && <span className="hero-nota">Reserva tu cita para el próximo día disponible.</span>}
+              {Array.isArray(horasHoy) && horasHoy.length === 0 && <span className="hero-nota">Reserva tu cita para el próximo día disponible.</span>}
             </div>
           </div>
         </div>
@@ -123,7 +135,8 @@ export default function Inicio() {
       </section>
 
       <section className="seccion seccion-servicios revelar" aria-label="Catálogo de servicios">
-        {errServ && <div className="caja-error">{errServ}</div>}
+        {errServ && <AvisoNoDisponible whatsapp={taller.whatsapp} onReintentar={cargarServicios}
+          texto="No pudimos cargar el catálogo de servicios en este momento. Inténtalo de nuevo en unos segundos o consúltanos directamente." />}
         {!servicios && !errServ && <div className="estado-vacio">Cargando servicios…</div>}
         {servicios && servicios.length === 0 && <div className="estado-vacio">Pronto publicaremos nuestro catálogo de servicios.</div>}
         {conCategoria.length > 0 && (
@@ -177,7 +190,8 @@ export default function Inicio() {
       <section className="seccion revelar" id="cita" style={{ paddingTop: 0 }}>
         <h2>Solicita tu <b>cita</b></h2>
         <p className="lead">Cuatro pasos sencillos. Tu solicitud queda registrada y el taller la confirmará.</p>
-        <ReservaPasos servicios={servicios || []} servicioElegido={servicioElegido} horarioTexto={taller.horario_texto} />
+        <ReservaPasos servicios={servicios || []} cargando={!servicios && !errServ} sinConexion={!!errServ} onReintentar={cargarServicios}
+          whatsapp={taller.whatsapp} servicioElegido={servicioElegido} horarioTexto={taller.horario_texto} />
       </section>
 
       <ContactoSeccion taller={taller} />
